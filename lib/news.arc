@@ -7,11 +7,11 @@
 
 (declare 'atstrings t)
 
-(= this-site*    "My Forum"
-   site-url*     "http://news.yourdomain.com/"
-   parent-url*   "http://www.yourdomain.com"
+(= this-site*    "羊圈动态"
+   site-url*     "http://news.yjion.com/"
+   parent-url*   "http://www.yjion.com"
    favicon-url*  ""
-   site-desc*    "What this site is about."               ; for rss feed
+   site-desc*    "搜罗一切有意义的事情，设计，最潮的技术，赚钱相关的信息。。。"               ; for rss feed
    site-color*   (color 180 180 180)
    border-color* (color 180 180 180)
    prefer-url*   t)
@@ -1011,7 +1011,7 @@ function vote(node) {
 
 (def titlelink (s url user)
   (let toself (blank url)
-    (tag (a href (if toself
+    (tag (a target "_blank" href (if toself
                       (item-url s!id)
                      (or (live s) (author user s) (editor user))
                       url
