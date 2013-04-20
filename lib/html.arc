@@ -232,8 +232,9 @@
 
 (mac center    body         `(tag center ,@body))
 (mac underline body         `(tag u ,@body))
-(mac tab       body         `(tag (table border 0) ,@body))
+(mac tab       body         `(tag (div style "max-width:960px; margin:0 auto;") (tag (table border 0) ,@body)))
 (mac tr        body         `(tag tr ,@body))
+(mac div       body         `(tag div ,@body))
 
 (let pratoms (fn (body)
                (if (or (no body)
@@ -241,8 +242,10 @@
                             body))
                    body
                    `((pr ,@body))))
-
+                   
+  (mac div      body         `(tag (div style "max-width:960px; margin:0 auto;") ,@(pratoms body)))
   (mac td       body         `(tag td ,@(pratoms body)))
+  (mac td_fix       body     `(tag (td width 30) ,@(pratoms body)))
   (mac trtd     body         `(tr (td ,@(pratoms body))))
   (mac tdr      body         `(tag (td align 'right) ,@(pratoms body)))
   (mac tdcolor  (col . body) `(tag (td bgcolor ,col) ,@(pratoms body)))
@@ -250,6 +253,8 @@
 
 (mac row args
   `(tr ,@(map [list 'td _] args)))
+(mac row_fix args
+  `(tr ,@(map [list 'td_fix _] args)))
 
 (mac prrow args
   (w/uniq g
@@ -260,7 +265,8 @@
                          (td (pr ,g)))))
                  args))))
 
-(mac prbold body `(tag b (pr ,@body)))
+(mac prbold_h3 body `(tag h3 (pr ,@body)))
+(mac prbold body `(tag (div style "background-color: #0066B2; color: white;") (pr ,@body)))
 
 (def para args
   (gentag p)
@@ -271,10 +277,18 @@
     (each i items
       (tag (option selected (is i sel))
         (pr i)))))
+        
+(def prdoctype ((o dt "html"))  (prn "<!doctype " dt ">"))
 
 (mac whitepage body
-  `(tag html
-     (tag (body bgcolor white alink linkblue) ,@body)))
+  `(do (prdoctype)
+   (tag html
+     (tag head
+       (gen-css-url)
+       (prn "<meta name=\"viewport\" content=\"width=device-width\">")
+       (tag (script src "http://pagewatch.b0.upaiyun.com/js/jquery.min.js")))
+     (tag (body bgcolor white alink linkblue style "max-width: 480px; margin: 0 auto;") 
+       (tag (div style "margin: 40px 0;" align "center") ,@body)))))
 
 (def errpage args (whitepage (apply prn args)))
 
@@ -284,7 +298,8 @@
 
 ; If h = 0, doesn't affect table column widths in some Netscapes.
 
-(def hspace (n)    (gentag img src (blank-url) height 1 width n))
+(def hspace (n)    (gentag div style (+ (+ "height:1px;width:" n) "px")))
+(def hspace_span (n)    (gentag span style (+ (+ "height:1px;width:" n) "px")))
 (def vspace (n)    (gentag img src (blank-url) height n width 0))
 (def vhspace (h w) (gentag img src (blank-url) height h width w))
 
@@ -306,10 +321,10 @@
 ; was `(tag (table border 0 cellpadding 0 cellspacing 7) ,@body)
 
 (mac sptab body
-  `(tag (table style "border-spacing: 7px 0px;") ,@body))
+  `(tag (div style "max-width:960px; margin:0 auto;") (tag (table style "border-spacing: 7px 0px;") ,@body)))
 
 (mac widtable (w . body)
-  `(tag (table width ,w) (tr (td ,@body))))
+  `(tag (table width ,w) (tr (td (div ,@body)))))
 
 (def cellpr (x) (pr (or x "&nbsp;")))
 
@@ -331,7 +346,7 @@
   `(tr (tag (td colspan ,n) ,@body)))
 
 (mac form (action . body)
-  `(tag (form method "post" action ,action) ,@body))
+  `(tag (div style "max-width:960px; margin:0 auto;") (tag (form method "post" action ,action) ,@body)))
 
 (mac textarea (name rows cols . body)
   `(tag (textarea name ,name rows ,rows cols ,cols) ,@body))
@@ -344,11 +359,13 @@
      ,@(map (fn ((name label len text))
               (w/uniq (gl gt)
                 `(let ,gl ,len
-                   (tr (td (pr ',label ":"))
+                   (tr (tag (td style "width: 20%")
+                      (tag (span style "position: relative; top: -8px;")
+                         (pr ',label "")))
                        (if (isa ,gl 'cons)
                            (td (textarea ',name (car ,gl) (cadr ,gl)
                                  (let ,gt ,text (if ,gt (pr ,gt)))))
-                           (td (gentag input type ',(if (is label '密码)
+                           (td (gentag input type ',(if (is label '密码:)
                                                     'password
                                                     'text)
                                          name ',name
@@ -394,6 +411,9 @@
 
 (def underlink (text (o dest text))
   (tag (a href dest) (tag u (pr text))))
+  
+(def underlink_container (text (o dest text))
+  (tag (div style "max-width:960px; margin:0 auto;")(tag (a href dest) (tag u (pr text)))))
 
 (def striptags (s)
   (let intag nil

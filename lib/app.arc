@@ -151,16 +151,14 @@
   (whitepage
     (pagemessage msg)
     (when (in switch 'login 'both)
-      (login-form "登陆" switch login-handler afterward)
+      (login-form "登录" switch login-handler afterward)
       (hook 'login-form afterward)
       (br2))
     (when (in switch 'register 'both)
-      (login-form "创建账号" switch create-handler afterward))))
+      (login-form "注册" switch create-handler afterward))))
 
 (def login-form (label switch handler afterward)
-  (prbold label)
-  (br2)
-  (fnform (fn (req) (handler req switch afterward))
+  (fnform label (fn (req) (handler req switch afterward))
           (fn () (pwfields (downcase label)))
           (acons afterward)))
 
@@ -198,8 +196,8 @@
   (prn "Set-Cookie: user=" cook "; expires=Sun, 17-Jan-2038 19:14:07 GMT"))
 
 (def pwfields ((o label "login"))
-  (inputs u 用户名 20 nil
-          p 密码 20 nil)
+  (inputs u 用户名: 20 nil
+          p 密码: 20 nil)
   (br)
   (submit label))
 
@@ -321,7 +319,7 @@
 
 (def needrows (text cols (o pad 0))
   (+ pad (max (+ 1 (count #\newline text))
-              (roundup (/ (len text) (- cols 5))))))
+              (if (> cols 5) (roundup (/ (len text) (- cols 5)))))))
 
 (def varline (typ id val (o liveurls))
   (if (in typ 'users 'syms 'toks 'bigtoks)  (apply prs val)
@@ -392,7 +390,7 @@
 ; a fn f and generates a form such that when submitted (f label newval)
 ; will be called for each valid value.  Finally done is called.
 
-(def vars-form (user fields f done (o button "update") (o lasts))
+(def vars-form (user fields f done (o button "更新") (o lasts))
   (taform lasts
           (if (all [no (_ 4)] fields)
               (fn (req))

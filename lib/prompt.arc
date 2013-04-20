@@ -23,7 +23,7 @@
         (tr (td app)
             (td (ulink user 'edit   (edit-app user app)))
             (td (ulink user 'run    (run-app  user app)))
-            (td (hspace 40)
+            (tag (td width 40)
                 (ulink user 'delete (rem-app  user app))))))
     (br2)
     (aform (fn (req)
@@ -65,7 +65,7 @@
                        (prompt-page user))
                    (login-page 'both nil
                                (fn (u ip) (prompt-page u))))))
-      (textarea "exprs" 10 82
+      (textarea "exprs" 10 0
         (pprcode (read-app user app)))
       (br2)
       (buts 'cmd "save" "cancel"))))
@@ -106,7 +106,7 @@
                 (= that (eval expr) thatexpr expr)
                 (push (list expr that) repl-history*))))
     (form url
-      (textarea "expr" 8 60)
+      (textarea "expr" 8 0)
       (sp)
       (submit))
     (tag xmp

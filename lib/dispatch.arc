@@ -86,8 +86,8 @@
 
 (mac fnform (f . body)
   `(let id (newop ,f)
-     (tag (form method 'post action (opurl id))
-       ,@body)))
+     (tag (div style "max-width:960px; margin:0 auto;")(tag (form method 'post action (opurl id))
+       ,@body))))
 
 
 ;; Misc utils

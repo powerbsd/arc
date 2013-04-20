@@ -1,6 +1,6 @@
 ; News.  2 Sep 06.
 
-; to run news: (nsv), then go to http://localhost:8080
+; to run news: (nsv), then go to http://localhost:3000
 ; put usernames of admins, separated by whitespace, in arc/admins
 
 ; bug: somehow (+ votedir* nil) is getting evaluated.
@@ -9,9 +9,9 @@
 
 (= this-site*    "羊圈动态"
    site-url*     "http://news.yjion.com/"
-   parent-url*   "http://www.yjion.com"
+   parent-url*   "http://www.yjion.com/"
    favicon-url*  ""
-   site-desc*    "搜罗一切有意义的事情，设计，最潮的技术，赚钱相关的信息。。。"               ; for rss feed
+   site-desc*    "搜罗一切有意义的事情，设计，最潮的技术。。。"; for rss feed
    site-color*   (color 180 180 180)
    border-color* (color 180 180 180)
    prefer-url*   t)
@@ -389,21 +389,26 @@
 (defopr favicon.ico req favicon-url*)
 
 (def gen-css-url ()
-  (prn "<link rel=\"stylesheet\" type=\"text/css\" href=\"news.css\">"))
+  (prn "<link rel=\"stylesheet\" type=\"text/css\" href=\"http://appsallin1.com/bootstrap.min.css\">")
+  (prn "<link rel=\"stylesheet\" type=\"text/css\" href=\"news.css\">")
+)
+
+(def prdoctype ((o dt "html"))  (prn "<!doctype " dt ">"))
 
 (mac npage (title . body)
-  `(tag html
+  `(do (prdoctype)
+   (tag html
      (tag head
        (gen-css-url)
        (prn "<link rel=\"shortcut icon\" href=\"" favicon-url* "\">")
        (prn "<meta name=\"viewport\" content=\"width=device-width\">")
+       (tag (script src "http://pagewatch.b0.upaiyun.com/js/jquery.min.js"))
        (tag script (pr votejs*))
        (tag title (pr ,title)))
-     (tag body
-       (center
-         (tag (table border 0 cellpadding 0 cellspacing 0 width "85%"
-                     bgcolor sand)
-           ,@body)))))
+     (tag (body style "margin:0;")
+       (tag (div)
+           (tag (div)
+           ,@body))))))
 
 (= pagefns* nil)
 
@@ -423,9 +428,10 @@
        (fulltop ,gu ,gi ,label ,title ,whence
          (trtd ,@body)
          (trtd (vspace 10)
-               (color-stripe (main-color ,gu))
-               (br)
-               (center
+               ; (color-stripe (main-color ,gu))
+               (tag (div style "max-width:960px; margin:0 auto; padding: 2px 0; border-top: 1px solid #0066B2;")
+                  (pr "友情链接：")
+                 (tag (a href "http://www.yjion.com/" target "_blank") (pr "羊圈[Yjion.com]"))
                  (hook 'longfoot)
                  (admin-bar ,gu (- (msec) ,gt) ,whence)))))))
 
@@ -440,7 +446,7 @@
       (hook 'admin-bar user whence))))
 
 (def color-stripe (c)
-  (tag (table width "100%" cellspacing 0 cellpadding 1)
+  (tag (table cellspacing 0 cellpadding 1 style "/*display: none;"*/)
     (tr (tdcolor c))))
 
 (mac shortpage (user lid label title whence . body)
@@ -455,9 +461,9 @@
 (def msgpage (user msg (o title))
   (minipage (or title "Message")
     (spanclass admin
-      (center (if (len> msg 80)
+      (div (if (len> msg 80)
                   (widtable 500 msg)
-                  (pr msg))))
+                    (pr msg))))
     (br2)))
 
 (= (max-age* 'news.css) 86400)   ; cache css in browser for 1 day
@@ -466,33 +472,34 @@
 
 (defop news.css req
   (pr "
-body  { font-family:Verdana; font-size:10pt; color:#828282; }
-td    { font-family:Verdana; font-size:10pt; color:#828282; }
+body  { font-family:Verdana; font-size:14pt; color:#828282; }
+td    { font-family:Verdana; font-size:14pt; color:#828282; }
+table { width: 100%; }
 
-.admin td   { font-family:Verdana; font-size:8.5pt; color:#000000; }
-.subtext td { font-family:Verdana; font-size:  7pt; color:#828282; }
+.admin td   { font-family:Verdana; font-size:10pt; color:#000000; }
+.subtext td { font-family:Verdana; font-size:  10pt; color:#828282; }
 
-input    { font-family:Courier; font-size:10pt; color:#000000; }
-input[type=\"submit\"] { font-family:Verdana; }
-textarea { font-family:Courier; font-size:10pt; color:#000000; }
-
+input    { font-family:Courier; font-size:14pt; color:#000000; }
+input[type=\"submit\"] { font-family:Verdana; width: 3em;}
+textarea { font-family:Courier; font-size:14pt; color:#000000; width:100%;}
+input {width:100%;}
 a:link    { color:#000000; text-decoration:none; }
 a:visited { color:#828282; text-decoration:none; }
 
-.default { font-family:Verdana; font-size: 10pt; color:#828282; }
-.admin   { font-family:Verdana; font-size:8.5pt; color:#000000; }
-.title   { font-family:Verdana; font-size: 10pt; color:#828282; }
-.adtitle { font-family:Verdana; font-size:  9pt; color:#828282; }
-.subtext { font-family:Verdana; font-size:  7pt; color:#828282; }
-.yclinks { font-family:Verdana; font-size:  8pt; color:#828282; }
-.pagetop { font-family:Verdana; font-size: 10pt; color:#222222; }
-.comhead { font-family:Verdana; font-size:  8pt; color:#828282; }
-.comment { font-family:Verdana; font-size:  9pt; }
-.dead    { font-family:Verdana; font-size:  9pt; color:#dddddd; }
+.default { font-family:Verdana; font-size:14pt; color:#828282; }
+.admin   { font-family:Verdana; font-size:10pt; color:#000000; }
+.title   { font-family:Verdana; font-size:14pt; color:#828282; background-color: #f5f5f5;}
+.adtitle { font-family:Verdana; font-size:  10pt; color:#828282; }
+.subtext { font-family:Verdana; font-size:  10pt; color:#828282; }
+.yclinks { font-family:Verdana; font-size:  10pt; color:#828282; }
+.pagetop { font-family:Verdana; font-size:14pt; color:white; }
+.comhead { font-family:Verdana; font-size:  10pt; color:#828282; }
+.comment { font-family:Verdana; font-size:  10pt; }
+.dead    { font-family:Verdana; font-size:  10pt; color:#dddddd; }
 
 .comment a:link, .comment a:visited { text-decoration:underline;}
 .dead a:link, .dead a:visited { color:#dddddd; }
-.pagetop a:visited { color:#000000;}
+.pagetop a:visited, .pagetop a:link { color:white;}
 .topsel a:link, .topsel a:visited { color:#ffffff; }
 
 .subtext a:link, .subtext a:visited { color:#828282; }
@@ -560,7 +567,7 @@ function vote(node) {
 
 ; Page top
 
-(= sand (color 246 246 239) textgray (gray 130))
+(= sand (color 255 255 255) textgray (gray 130))
 
 (def main-color (user)
   (aif (and user (uvar user topcolor))
@@ -568,22 +575,22 @@ function vote(node) {
        site-color*))
 
 (def pagetop (switch lid label (o title) (o user) (o whence))
-; (tr (tdcolor black (vspace 5)))
-  (tr (tdcolor (main-color user)
-        (tag (table border 0 cellpadding 0 cellspacing 0 width "100%"
-                    style "padding:2px")
+  (tag (div style "padding:10px; background-color: #0066B2; color: white; /*width:100%;*/")
+    (tag (div style "max-width:960px; margin:0 auto;")
+      (div 
+        (tag (table border 0 cellpadding 0 cellspacing 0)
           (tr (gen-logo)
               (when (is switch 'full)
                 (tag (td style "line-height:12pt; height:10px;")
                   (spanclass pagetop
                     (tag b (link this-site* "news"))
-                    (hspace 10)
+                    (hspace_span 10)
                     (toprow user label))))
              (if (is switch 'full)
                  (tag (td style "text-align:right;padding-right:4px;")
                    (spanclass pagetop (topright user whence)))
                  (tag (td style "line-height:12pt; height:10px;")
-                   (spanclass pagetop (prbold label))))))))
+                   (spanclass pagetop (prbold label)))))))))
   (map [_ user] pagefns*)
   (spacerow 10))
 
@@ -601,13 +608,13 @@ function vote(node) {
   (w/bars
     (when (noob user)
       (toplink "欢迎" welcome-url* label))
-    (toplink "最新" "newest" label)
+    (toplink "新帖子" "newest" label)
     (when user
-      (toplink "话题" (threads-url user) label))
+      (toplink "我的留言" (threads-url user) label))
     (toplink "留言" "newcomments" label)
-    (toplink "用户"  "leaders"     label)
+    (toplink "本站之星"  "leaders"     label)
     (hook 'toprow user label)
-    (link "submit")
+    (link "发帖" "submit")
     (unless (mem label toplabels*)
       (fontcolor white (pr label)))))
 
@@ -744,10 +751,10 @@ function vote(node) {
       (profile-form user subject)
       (br2)
       (when (some astory:item (uvar subject submitted))
-        (underlink "submissions" (submitted-url subject)))
+        (underlink_container "submissions" (submitted-url subject)))
       (when (some acomment:item (uvar subject submitted))
         (sp)
-        (underlink "comments" (threads-url subject)))
+        (underlink_container "comments" (threads-url subject)))
       (hook 'user user subject))))
 
 (def profile-form (user subject)
@@ -807,14 +814,14 @@ function vote(node) {
   (tostring (underlink "reset password" "resetpw")))
 
 (newsop welcome ()
-  (pr "欢饮来到" this-site* ", " user "!"))
+  (pr "欢迎来到" this-site* "" user "！"))
 
 
 ; Main Operators
 
 ; remember to set caching to 0 when testing non-logged-in
 
-(= caching* 1 perpage* 30 threads-perpage* 10 maxend* 210)
+(= caching* 1 perpage* 20 threads-perpage* 10 maxend* 210)
 
 ; Limiting that newscache can't take any arguments except the user.
 ; To allow other arguments, would have to turn the cache from a single
@@ -851,7 +858,7 @@ function vote(node) {
 ; cached page.  If this were a prob, could make deletion clear caches.
 
 (newscache newestpage user 40
-  (listpage user (msec) (newstories user maxend*) "new" "最新" "newest"))
+  (listpage user (msec) (newstories user maxend*) "new" "新帖子" "newest"))
 
 (def newstories (user n)
   (retrieve n [cansee user _] stories*))
@@ -928,19 +935,20 @@ function vote(node) {
 
 (def display-items (user items label title whence
                     (o start 0) (o end perpage*) (o number))
-  (zerotable
-    (let n start
-      (each i (cut items start end)
-        (display-item (and number (++ n)) i user whence t)
-        (spacerow (if (acomment i) 15 5))))
-    (when end
-      (let newend (+ end perpage*)
-        (when (and (<= newend maxend*) (< end (len items)))
-          (spacerow 10)
-          (tr (tag (td colspan (if number 2 1)))
-              (tag (td class 'title)
-                (morelink display-items
-                          items label title end newend number))))))))
+  (tag (div style "max-width:960px; margin:0 auto;")
+    (zerotable
+      (let n start
+        (each i (cut items start end)
+          (display-item (and number (++ n)) i user whence t)
+          (spacerow (if (acomment i) 15 5))))
+      (when end
+        (let newend (+ end perpage*)
+          (when (and (<= newend maxend*) (< end (len items)))
+            (spacerow 10)
+            (tr (tag (td colspan (if number 2 1)))
+                (tag (td class 'title)
+                  (morelink display-items
+                            items label title end newend number)))))))))
 
 ; This code is inevitably complex because the More fn needs to know
 ; its own fnid in order to supply a correct whence arg to stuff on
@@ -957,12 +965,12 @@ function vote(node) {
                        (longpage user (msec) nil label title url
                          (apply f user items label title url args))))))
           rel 'nofollow)
-    (pr "More")))
+    (pr "查看更多")))
 
 (def display-story (i s user whence)
   (when (or (cansee user s) (s 'kids))
     (tr (display-item-number i)
-        (td (votelinks s user whence))
+        (tag (td width votewid* valign 'top) (votelinks s user whence))
         (titleline s s!url user whence))
     (tr (tag (td colspan (if i 2 1)))
         (tag (td class 'subtext)
@@ -978,7 +986,7 @@ function vote(node) {
           (deletelink s user whence)))))
 
 (def display-item-number (i)
-  (when i (tag (td align 'right valign 'top class 'title)
+  (when i (tag (td align 'right valign 'top class 'title width 10)
             (pr i "."))))
 
 (= follow-threshold* 5)
@@ -1011,7 +1019,8 @@ function vote(node) {
 
 (def titlelink (s url user)
   (let toself (blank url)
-    (tag (a target "_blank" href (if toself
+    (tag (a target "_blank" 
+            href (if toself
                       (item-url s!id)
                      (or (live s) (author user s) (editor user))
                       url
@@ -1059,7 +1068,7 @@ function vote(node) {
          (do (fontcolor orange (pr "*"))
              (br)
              (hspace votewid*))
-        (hspace votewid*))))
+             (hspace votewid*))))
 
 ; could memoize votelink more, esp for non-logged in users,
 ; since only uparrow is shown; could straight memoize
@@ -1424,7 +1433,7 @@ function vote(node) {
 
 (def submit-page (user (o url) (o title) (o showtext) (o text "") (o msg)
                        (o req)) ; unused
-  (minipage "提交"
+  (minipage "发帖"
     (pagemessage msg)
     (urform user req
             (process-story (get-user req)
@@ -1434,16 +1443,16 @@ function vote(node) {
                            (and showtext (md-from-form (arg req "x") t))
                            req!ip)
       (tab
-        (row "标题"  (input "t" title 50))
+        (tr (tag (td width 30) (prn "标题")) (td (input "t" title 50)))
         (if prefer-url*
             (do (row "网页地址" (input "u" url 50))
                 (when showtext
                   (row "" "<b>或</b>")
-                  (row "文" (textarea "x" 4 50 (only.pr text)))))
-            (do (row "文本" (textarea "x" 4 50 (only.pr text)))
+                  (row "文本" (textarea "x" 4 0 (only.pr text)))))
+            (do (row "文本" (textarea "x" 4 0 (only.pr text)))
                 (row "" "<b>或</b>")
-                (row "网页地址" (input "u" url 50))))
-        (row "" (submit))
+                (row "网页地址" (input "u" url 0))))
+        (row "" (submit "发帖"))
         (spacerow 20)
         (row "" submit-instructions*)))))
 
@@ -1687,9 +1696,9 @@ function vote(node) {
                           req!ip)
       (tab
         (row "title"   (input "t" title 50))
-        (row "text"    (textarea "x" 4 50 (only.pr text)))
+        (row "text"    (textarea "x" 4 0 (only.pr text)))
         (row ""        "Use blank lines to separate choices:")
-        (row "choices" (textarea "o" 7 50 (only.pr opts)))
+        (row "choices" (textarea "o" 7 0 (only.pr opts)))
         (row ""        (submit))))))
 
 (= fewopts* "A poll must have at least two options.")
@@ -1735,7 +1744,7 @@ function vote(node) {
             (do (add-pollopt user p (striptags (arg req "x")) req!ip)
                 (item-url p!id))
       (tab
-        (row "text" (textarea "x" 4 50))
+        (row "text" (textarea "x" 4 0))
         (row ""     (submit))))))
 
 (def add-pollopt (user p text ip)
@@ -1751,7 +1760,7 @@ function vote(node) {
 
 (def display-pollopt (n o user whence)
   (tr (display-item-number n)
-      (tag (td valign 'top)
+      (tag (td valign 'top width votewid*)
         (votelinks o user whence))
       (tag (td class 'comment)
         (tag (div style "margin-top:1px;margin-bottom:0px")
@@ -1971,7 +1980,7 @@ function vote(node) {
            (fn (req)
              (when-umatch/r user req
                (process-comment user parent (arg req "text") req!ip whence)))
-    (textarea "text" 6 60
+    (textarea "text" 6 0
       (aif text (prn (unmarkdown it))))
     (when (and noob-comment-msg* (noob user))
       (br2)
@@ -2032,8 +2041,8 @@ function vote(node) {
 (def display-comment (n c user whence (o astree) (o indent 0)
                                       (o showpar) (o showon))
   (tr (display-item-number n)
-      (when astree (td (hspace (* indent 40))))
-      (tag (td valign 'top) (votelinks c user whence t))
+      (when astree (tag (td width (* indent 40) )))
+      (tag (td valign 'top width votewid*) (votelinks c user whence t))
       (display-comment-body c user whence astree indent showpar showon)))
 
 ; Comment caching doesn't make generation of comments significantly
@@ -2168,7 +2177,7 @@ function vote(node) {
 
 (def threads-page (user subject)
   (if (profile subject)
-      (withs (title (+ subject "'的留言")
+      (withs (title (+ subject "的留言")
               label (if (is user subject) "threads" title)
               here  (threads-url subject))
         (longpage user (msec) nil label title here
@@ -2186,8 +2195,8 @@ function vote(node) {
       (let newend (+ end threads-perpage*)
         (when (and (<= newend maxend*) (< end (len comments)))
           (spacerow 10)
-          (row (tab (tr (td (hspace 0))
-                        (td (hspace votewid*))
+          (row (tab (tr ; (tag (td width 0))
+                        (tag (td width votewid*))
                         (tag (td class 'title)
                           (morelink display-threads
                                     comments label title end newend))))))))))
@@ -2263,9 +2272,9 @@ function vote(node) {
     (sptab
       (let i 0
         (each u (firstn nleaders* (leading-users))
-          (tr (tdr:pr (++ i) ".")
-              (td (userlink user u nil))
-              (tdr:pr (karma u))
+          (tr (tag (td width 40) (pr (++ i) "."))
+              (tag (td width 200) (userlink user u nil))
+              (tag (td) (pr (karma u)))
               (when (admin user)
                 (tdr:prt (only.num (uvar u avg) 2 t t))))
           (if (is i 10) (spacerow 30)))))))
@@ -2333,8 +2342,7 @@ function vote(node) {
 
 (newscache newcomments-page user 60
   (listpage user (msec) (visible user (firstn maxend* comments*))
-            "comments" "最新留言" "newcomments" nil))
-
+            "comments" "留言" "newcomments" nil))
 
 ; Doc
 
@@ -2400,16 +2408,18 @@ first asterisk isn't whitespace.
 
 (def resetpw-page (user (o msg))
   (minipage "Reset Password"
-    (if msg
-         (pr msg)
-        (blank (uvar user email))
-         (do (pr "Before you do this, please add your email address to your ")
-             (underlink "profile" (user-url user))
-             (pr ". Otherwise you could lose your account if you mistype
-                  your new password.")))
+    (tag (div style "max-width:960px; margin:0 auto;")
+      (if msg
+           (pr msg)
+          (blank (uvar user email))
+           (do (pr "Before you do this, please add your email address to your ")
+               (underlink "profile" (user-url user))
+               (pr ". Otherwise you could lose your account if you mistype
+                    your new password."))))
     (br2)
-    (uform user req (try-resetpw user (arg req "p"))
-      (single-input "New password: " 'p 20 "reset" t))))
+    (tag (div style "max-width:960px; margin:0 auto;")
+      (uform user req (try-resetpw user (arg req "p"))
+        (single-input "New password: " 'p 20 "reset" t)))))
 
 (def try-resetpw (user newpw)
   (if (len< newpw 4)
